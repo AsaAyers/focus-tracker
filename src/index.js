@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
+const electron = window.require('electron');
+
+window.wat = electron.remote.getGlobal('wat')
+
 
 ReactDOM.render(<App />, document.getElementById('root'));
 

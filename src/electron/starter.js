@@ -2,6 +2,11 @@
 const {app, Menu, Tray, BrowserWindow} = require('electron')
 const path = require('path')
 const url = require('url')
+require('electron-reload')(__dirname, {
+  electron: require.resolve('.bin/electron')
+});
+
+console.log('wat')
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -51,7 +56,7 @@ function showWindow() {
 
 let appIcon
 function onReady() {
-  const icon = path.join(__dirname, '../Free_Egg_Timer_Vector_01/clock.png')
+  const icon = path.join(__dirname, '../../Free_Egg_Timer_Vector_01/clock.png')
 
   appIcon = new Tray(icon)
   const contextMenu = Menu.buildFromTemplate([
