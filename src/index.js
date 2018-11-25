@@ -4,8 +4,12 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 const electron = window.require('electron');
+const { ipcRenderer } = electron
+window.electron = electron
 
-window.wat = electron.remote.getGlobal('wat')
+ipcRenderer.on('update', (event, data) => {
+  console.log('update', data)
+})
 
 
 ReactDOM.render(<App />, document.getElementById('root'));

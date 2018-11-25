@@ -1,3 +1,5 @@
+// https://medium.freecodecamp.org/building-an-electron-application-with-create-react-app-97945861647c
+
 // Modules to control application life and create native browser window
 const {app, Menu, Tray, BrowserWindow} = require('electron')
 const path = require('path')
@@ -6,7 +8,6 @@ require('electron-reload')(__dirname, {
   electron: require.resolve('.bin/electron')
 });
 
-console.log('wat')
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -32,6 +33,23 @@ function createWindow () {
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
   }
+
+  mainWindow.webContents.on('did-finish-load', () => {
+    console.log('did-finis-hload')
+    let data = Math.random()
+    mainWindow.webContents.send('update', data)
+
+    let timer = setInterval(() => {
+      if (mainWindow == null) {
+        clearInterval(timer)
+        return
+      }
+      data = Math.random()
+      console.log('send update', data)
+      mainWindow.webContents.send('update', data)
+    }, 1000)
+
+  })
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
@@ -61,8 +79,10 @@ function onReady() {
   appIcon = new Tray(icon)
   const contextMenu = Menu.buildFromTemplate([
     {label: 'Open', type: 'normal', click: showWindow},
-    {label: 'recording', type: 'checkbox', checked: true},
-    {label: 'Exit', type: 'normal'}
+    // {label: 'recording', type: 'checkbox', checked: true},
+    {label: 'Exit', type: 'normal', click: () => {
+      process.exit()
+    }}
   ])
   appIcon.setToolTip('This is my application.')
   appIcon.setContextMenu(contextMenu)
@@ -77,11 +97,12 @@ app.on('ready', onReady)
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
-  // On macOS it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+  console.log('window-all-closed')
+//   // On macOS it is common for applications and their menu bar
+//   // to stay active until the user quits explicitly with Cmd + Q
+//   if (process.platform !== 'darwin') {
+//     app.quit()
+//   }
 })
 
 app.on('activate', function () {

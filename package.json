@@ -5,11 +5,15 @@
   "main": "src/electron/starter.js",
   "homepage": "./",
   "dependencies": {
+    "active-win": "^4.0.0",
+    "debug": "^4.1.0",
     "electron": "^3.0.10",
     "electron-reload": "^1.3.0",
+    "lock-your-windows": "^0.0.0",
     "react": "^16.6.3",
     "react-dom": "^16.6.3",
-    "react-scripts": "2.1.1"
+    "react-scripts": "2.1.1",
+    "tail-file": "^1.4.3"
   },
   "scripts": {
     "start": "cross-env BROWSER=none nf start",
