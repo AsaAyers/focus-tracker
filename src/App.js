@@ -20,6 +20,7 @@ class App extends Component {
             Learn React
           </a>
         </header>
+        <a href="https://www.Vecteezy.com">Graphics Provided by vecteezy.com</a>
       </div>
     );
   }
