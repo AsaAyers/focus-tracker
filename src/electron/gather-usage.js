@@ -136,15 +136,14 @@ module.exports = function gatherUsage(filename, callback) {
     data = reducer(data, line)
   })
 
-  tail.on('eof', () => {
-    console.log('eof')
+  function sendReport() {
     const line = JSON.stringify({
       ts: Math.round(Date.now() / 1000),
       className: 'END',
       title: ""
     })
-    const tmp = reducer(data, line)
 
+    const tmp = reducer(data, line)
 
     const sortedData = Object.values(tmp.records)
       .sort((a, b) => b.total - a.total)
@@ -160,10 +159,17 @@ module.exports = function gatherUsage(filename, callback) {
       })
 
     callback(sortedData)
+  }
+
+  tail.on('eof', () => {
+    sendReport()
   })
 
   tail.start()
+  // At least report once a minute
+  const reportInterval = setInterval(sendReport, 60000)
   return function unsubscribe() {
+    clearInterval(reportInterval)
     tail.stop()
   }
 }

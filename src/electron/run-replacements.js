@@ -1,12 +1,10 @@
 const fs = require('fs')
-const os = require('os')
-const path = require('path')
+const { TRANSFORMS } = require('../constants')
 
 module.exports = function runReplacements(record) {
   let transforms = []
-  const configFilename = path.join(os.homedir(), '.i3-monitor.json')
-  if (fs.existsSync(configFilename)) {
-    transforms = JSON.parse(fs.readFileSync(configFilename))
+  if (fs.existsSync(TRANSFORMS)) {
+    transforms = JSON.parse(fs.readFileSync(TRANSFORMS))
   }
   // eslint-disable-next-line no-shadow
   return transforms.reduce((record, transform) => {

@@ -5,6 +5,7 @@ const {app, Menu, Tray, BrowserWindow} = require('electron')
 const path = require('path')
 const url = require('url')
 const gatherUsage = require('./gather-usage')
+const logWindows = require('./log-windows')
 const { LOGFILE } = require('../constants')
 
 if (process.env.ELECTRON_START_URL) {
@@ -67,6 +68,7 @@ function showWindow() {
 
 let appIcon
 function onReady() {
+  logWindows()
   const icon = path.join(__dirname, '../../Free_Egg_Timer_Vector_01/clock.png')
 
   appIcon = new Tray(icon)
@@ -90,6 +92,10 @@ function onReady() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', onReady)
+
+app.on('window-all-closed', function () {
+  // This app doesn't exit when the window closes.
+});
 
 app.on('activate', function () {
   // On macOS it's common to re-create a window in the app when the
