@@ -27,10 +27,7 @@ module.exports = function logWindows() {
     }
 
     if (isWin) {
-      // On windows these seem to come back as empty strings while the screen is locked
-      const isEmpty = win.className === "" && win.title === ""
-
-      if (win.className === 'LockApp.exe' || isEmpty) {
+      if (win.owner.name === 'LockApp.exe' || win.owner.name === "" ) {
         if (event.className !== 'LOCK') {
           event = {
             ts,
@@ -58,5 +55,5 @@ module.exports = function logWindows() {
       title: win.title,
     }
     logWindow(event)
-  }, 1000)
+  }, 10000)
 }
