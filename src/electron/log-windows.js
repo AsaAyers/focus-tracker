@@ -15,26 +15,8 @@ function logWindow(data) {
 module.exports = function logWindows() {
   const isWin = process.platform === 'win32'
   let event = {}
-  let locked = false
   setInterval(() => {
     const ts = Math.floor(Date.now() / 1000)
-    if (isWin) {
-      // eslint-disable-next-line global-require
-      const lockYourWindows = require('lock-your-windows')
-      const isLocked = lockYourWindows.isLocked()
-
-      if (locked !== isLocked) {
-        locked = isLocked
-        if (isLocked) {
-          logWindow({ ts, className: 'LOCK', title: '' })
-          return
-        }
-        logWindow({ ts, className: 'UNLOCK', title: '' })
-      } if (locked) {
-        // Don't record any events if the console is locked
-        return
-      }
-    }
 
     let win
     try {
@@ -43,6 +25,30 @@ module.exports = function logWindows() {
       console.error(e)
       return
     }
+
+    if (isWin) {
+      // On windows these seem to come back as empty strings while the screen is locked
+      const isEmpty = win.className === "" && win.title === ""
+
+      if (win.className === 'LockApp.exe' || isEmpty) {
+        if (event.className !== 'LOCK') {
+          event = {
+            ts,
+            className: "LOCK",
+            title: ""
+          }
+          logWindow(event)
+        }
+        return
+      } else if (event.className === "LOCK") {
+        logWindow({
+          ts,
+          className: "UNLOCK",
+          title: ""
+        })
+      }
+    }
+
     if (event.title === win.title && event.className === win.owner.name) {
       return
     }
