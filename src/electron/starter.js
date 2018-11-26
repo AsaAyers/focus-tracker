@@ -4,10 +4,16 @@
 const {app, Menu, Tray, BrowserWindow} = require('electron')
 const path = require('path')
 const url = require('url')
-require('electron-reload')(__dirname, {
-  electron: require.resolve('.bin/electron')
-});
+const gatherUsage = require('./gather-usage')
+const { LOGFILE } = require('../constants')
 
+if (process.env.ELECTRON_START_URL) {
+  const chokidar = require('chokidar')
+  chokidar.watch(__dirname).on('change', () => {
+    console.log('change')
+    app.exit(1)
+  })
+}
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -15,18 +21,17 @@ let mainWindow
 
 function createWindow () {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 800, height: 600, show: false})
+  mainWindow = new BrowserWindow({show: false})
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
   })
 
-
-  const startUrl = process.env.ELECTRON_START_URL || url.format({
-    pathname: path.join(__dirname, '/../build/index.html'),
+  let startUrl = process.env.ELECTRON_START_URL || url.format({
+    pathname: path.join(__dirname, '../../build/index.html'),
     protocol: 'file:',
     slashes: true
   });
-  console.log('startUrl', startUrl)
+
   mainWindow.loadURL(startUrl);
 
   if (process.env.ELECTRON_START_URL) {
@@ -36,29 +41,17 @@ function createWindow () {
 
   mainWindow.webContents.on('did-finish-load', () => {
     console.log('did-finis-hload')
-    let data = Math.random()
-    mainWindow.webContents.send('update', data)
-
-    let timer = setInterval(() => {
-      if (mainWindow == null) {
-        clearInterval(timer)
-        return
+    const win = mainWindow
+    const unsubscribe = gatherUsage(LOGFILE, (data) => {
+      if (mainWindow !== win) {
+        return unsubscribe()
       }
-      data = Math.random()
-      console.log('send update', data)
-      mainWindow.webContents.send('update', data)
-    }, 1000)
 
+      mainWindow.webContents.send('update', data)
+    })
   })
 
-  // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
-
-  // Emitted when the window is closed.
   mainWindow.on('closed', function () {
-    // Dereference the window object, usually you would store windows
-    // in an array if your app supports multi windows, this is the time
-    // when you should delete the corresponding element.
     mainWindow = null
   })
 }
@@ -87,23 +80,16 @@ function onReady() {
   appIcon.setToolTip('This is my application.')
   appIcon.setContextMenu(contextMenu)
 
-  showWindow()
+
+  if (process.env.ELECTRON_START_URL) {
+    showWindow()
+  }
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', onReady)
-
-// Quit when all windows are closed.
-app.on('window-all-closed', function () {
-  console.log('window-all-closed')
-//   // On macOS it is common for applications and their menu bar
-//   // to stay active until the user quits explicitly with Cmd + Q
-//   if (process.platform !== 'darwin') {
-//     app.quit()
-//   }
-})
 
 app.on('activate', function () {
   // On macOS it's common to re-create a window in the app when the
@@ -112,6 +98,3 @@ app.on('activate', function () {
     createWindow()
   }
 })
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.

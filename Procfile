@@ -1,2 +1,2 @@
 react: npm run start-react
-electron: node src/electron/wait-react
+electron: nodemon --watch src/electron src/electron/wait-react
