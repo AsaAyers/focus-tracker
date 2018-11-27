@@ -28,30 +28,30 @@ module.exports = function logWindows() {
 
     if (isWin) {
       if (win.owner.name === 'LockApp.exe' || win.owner.name === "" ) {
-        if (event.className !== 'LOCK') {
+        if (event.app !== 'LOCK') {
           event = {
             ts,
-            className: "LOCK",
+            app: "LOCK",
             title: ""
           }
           logWindow(event)
         }
         return
-      } else if (event.className === "LOCK") {
+      } else if (event.app === "LOCK") {
         logWindow({
           ts,
-          className: "UNLOCK",
+          app: "UNLOCK",
           title: ""
         })
       }
     }
 
-    if (event.title === win.title && event.className === win.owner.name) {
+    if (event.title === win.title && event.app === win.owner.name) {
       return
     }
     event = {
       ts,
-      className: win.owner.name,
+      app: win.owner.name,
       title: win.title,
     }
     logWindow(event)

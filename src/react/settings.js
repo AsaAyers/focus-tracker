@@ -30,10 +30,10 @@ class Settings extends React.PureComponent {
     newTransform: false,
   }
 
-  renderClassNames(classNames) {
+  renderApps(apps) {
     const { classes } = this.props;
 
-    return classNames.map(name => (
+    return apps.map(name => (
       <Chip key={name} label={name} className={classes.chip} />
     ))
   }
@@ -117,9 +117,9 @@ class Settings extends React.PureComponent {
                 <TableCell component="th" scope="row">
                   {n.title}
                 </TableCell>
-                <TableCell>{this.renderClassNames(n.className || [])}</TableCell>
+                <TableCell>{this.renderApps(n.app || [])}</TableCell>
                 <TableCell>{n.replaceTitle}</TableCell>
-                <TableCell>{n.replaceClass}</TableCell>
+                <TableCell>{n.replaceApp}</TableCell>
                 <TableCell onClick={this.handleEdit(n.id)}><EditIcon/></TableCell>
               </TableRow>
             ))}

@@ -13,16 +13,18 @@ let settings = {
 }
 
 function normalizeTransform(transform) {
-  const id =  uuid()
-  console.log('id', id)
-  const className = (typeof transform.className === "string"
-      ? transform.className.split(',').map(s => s.trim())
-      : (transform.className || [])
+  let tmp = transform.app || transform.className
+  let app = (typeof tmp === "string"
+      ? tmp.split(',').map(s => s.trim())
+      : (tmp || [])
     ).filter(s => s.length > 0)
+
   return {
-    id,
-    ...transform,
-    className,
+    id: transform.id || uuid(),
+    title: transform.title,
+    app,
+    replaceTitle: transform.replaceTitle,
+    replaceApp: transform.replaceApp || transform.replaceClass,
   }
 }
 

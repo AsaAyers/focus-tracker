@@ -13,8 +13,8 @@ module.exports = function runReplacements(record) {
     }
 
     const matchClass = (
-      transform.className == null
-        || transform.className.indexOf(record.className) >= 0
+      transform.app == null
+        || transform.app.indexOf(record.app) >= 0
     )
     const match = record.title.match(titleRegex)
 
@@ -25,9 +25,9 @@ module.exports = function runReplacements(record) {
     if (matchClass && match) {
       const title = record.title.replace(titleRegex, transform.replaceTitle)
 
-      let { className } = record
-      if (transform.replaceClass) {
-        className = transform.replaceClass.replace(
+      let { app } = record
+      if (transform.replaceApp) {
+        app = transform.replaceApp.replace(
           /\$(\d)/,
           (full, digit) => match[digit],
         )
@@ -35,7 +35,7 @@ module.exports = function runReplacements(record) {
 
       return {
         ...record,
-        className,
+        app,
         title,
       }
     }

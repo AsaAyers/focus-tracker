@@ -15,9 +15,9 @@ class EditTransform extends React.PureComponent {
       transform: {
         title: "",
         replaceTitle: "",
-        replaceClassName: "",
+        replaceApp: "",
         ...props.transform,
-        className: (props.transform.className||[]).join(', ')
+        app: (props.transform.app||[]).join(', ')
       }
     }
   }
@@ -76,8 +76,8 @@ class EditTransform extends React.PureComponent {
             margin="dense"
             id="app"
             label="Apps (comma separated)"
-            value={transform.className}
-            onChange={this.onChange('className')}
+            value={transform.app}
+            onChange={this.onChange('app')}
             fullWidth
             />
           <TextField
@@ -93,8 +93,8 @@ class EditTransform extends React.PureComponent {
             margin="dense"
             id="replaceApp"
             label="Replace App (optional)"
-            value={transform.replaceClassName}
-            onChange={this.onChange('replaceClassName')}
+            value={transform.replaceApp}
+            onChange={this.onChange('replaceApp')}
             fullWidth
             />
         </DialogContent>
