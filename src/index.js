@@ -31,8 +31,8 @@ ipcRenderer.on('update', (event, newData) => {
 })
 
 ipcRenderer.on('settings', (event, newSettings) => {
-  console.log('new settings?')
   settings = newSettings
+  ipcRenderer.send('reset')
   render()
 })
 

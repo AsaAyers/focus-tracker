@@ -1,7 +1,7 @@
 // https://medium.freecodecamp.org/building-an-electron-application-with-create-react-app-97945861647c
 
 // Modules to control application life and create native browser window
-const {app, Menu, Tray, BrowserWindow} = require('electron')
+const {ipcMain, app, Menu, Tray, BrowserWindow} = require('electron')
 const path = require('path')
 const url = require('url')
 const gatherUsage = require('./gather-usage')
@@ -49,14 +49,30 @@ function createWindow () {
 
     readSettings()
     notifyOpenWindows()
-    const unsubscribe = gatherUsage(LOGFILE, (data) => {
-      if (mainWindow !== win) {
-        return unsubscribe()
+    // I'm definitely missing an easier way to do this
+    function setupUsageSubscription() {
+      let unsubscribe
+      function reset() {
+        console.log('reset')
+        unsubscribe()
+        ipcMain.removeListener('reset', reset)
+        if (mainWindow === win) {
+          setupUsageSubscription()
+        }
       }
 
-      mainWindow.webContents.send('update', data)
-      readSettings()
-    })
+      console.log('subscribe to usage')
+      unsubscribe = gatherUsage(LOGFILE, (data) => {
+        if (mainWindow !== win) {
+          return reset()
+        }
+
+        mainWindow.webContents.send('update', data)
+        readSettings()
+      })
+      ipcMain.on('reset', reset)
+    }
+    setupUsageSubscription()
   })
 
   mainWindow.on('closed', function () {
@@ -81,12 +97,8 @@ function onReady() {
   appIcon = new Tray(icon)
   const contextMenu = Menu.buildFromTemplate([
     {label: 'Open', type: 'normal', click: showWindow},
-    // {label: 'recording', type: 'checkbox', checked: true},
-    {label: 'Exit', type: 'normal', click: () => {
-      process.exit()
-    }}
   ])
-  appIcon.setToolTip('This is my application.')
+  appIcon.setToolTip('Focus Tracker')
   appIcon.setContextMenu(contextMenu)
 
 
@@ -95,19 +107,34 @@ function onReady() {
   }
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on('ready', onReady)
 
-app.on('window-all-closed', function () {
-  // This app doesn't exit when the window closes.
-});
+if (!app.requestSingleInstanceLock()) {
+  app.quit()
+} else {
+  // This method will be called when Electron has finished
+  // initialization and is ready to create browser windows.
+  // Some APIs can only be used after this event occurs.
+  app.on('ready', onReady)
 
-app.on('activate', function () {
-  // On macOS it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (mainWindow === null) {
-    createWindow()
-  }
-})
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    // Someone tried to run a second instance, we should focus our window.
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.focus()
+    } else {
+      createWindow()
+    }
+  })
+
+  app.on('window-all-closed', function () {
+    // This app doesn't exit when the window closes.
+  });
+
+  app.on('activate', function () {
+    // On macOS it's common to re-create a window in the app when the
+    // dock icon is clicked and there are no other windows open.
+    if (mainWindow === null) {
+      createWindow()
+    }
+  })
+}

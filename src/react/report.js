@@ -12,10 +12,6 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { toTime } from '../utils'
 
-function Time(props) {
-  return toTime(props.children, props.padding === true)
-}
-
 const styles = theme => ({
   root: {
     width: '100%',
@@ -32,13 +28,18 @@ const styles = theme => ({
 });
 
 class Report extends Component {
+
+  handleEdit = (app, title) => () => {
+    this.props.onEdit({ app, title })
+  }
+
   renderRecord = (record) => {
     const { classes } = this.props
 
     let titles = record.titles
       .filter((title) => title.total > 60)
       .map(({name, total}) => (
-        <ListItem key={name}>
+        <ListItem key={name} button={true} onClick={this.handleEdit([record.name], name)}>
           <ListItemText primary={toTime(total) + ' ' +name} />
         </ListItem>
       ))

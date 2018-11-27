@@ -27,7 +27,7 @@ const styles = theme => ({
     backgroundColor: theme.palette.background.paper,
   },
   fab: {
-    position: 'absolute',
+    position: 'fixed',
     bottom: theme.spacing.unit * 2,
     right: theme.spacing.unit * 2,
   },
@@ -36,7 +36,6 @@ const styles = theme => ({
 
 class App extends Component {
   state = {
-    showModal: false,
     tab: (process.env.NODE_ENV === 'development'
       ? 'report'
       : 'report'
@@ -45,27 +44,43 @@ class App extends Component {
 
   handleChangeTab = (event, tab) => this.setState({ tab });
 
-  handleShowModal = () => this.setState({ showModal: true })
+  handleShowModal = () => this.setState({ editTransform: {} })
 
-  handleCloseModal = () => this.setState({ showModal: false })
+  handleEdit = (transform) => this.setState({ editTransform: transform })
 
-  createTransform = (transform) => {
-    const { saveTransforms, settings } = this.props
+  handleCloseModal = () => this.setState({ editTransform: null })
 
-    saveTransforms([
-      ...settings.transforms,
-      transform,
-    ])
+  saveTransform = (transform) => {
+    const { settings, saveTransforms } = this.props;
+    if (!transform.id) {
+      saveTransforms([
+        ...settings.transforms,
+        transform,
+      ])
+    } else {
+      saveTransforms(settings.transforms.map(
+        t => t.id === transform.id ? transform : t
+      ))
+    }
+
+    this.handleCloseModal()
+  }
+
+  deleteTransform = (id) => {
+    const { settings, saveTransforms } = this.props;
+    saveTransforms(settings.transforms.filter(
+      t => t.id !== id
+    ))
     this.handleCloseModal()
   }
 
   renderSettings() {
-    const { settings, saveTransforms } = this.props
+    const { settings } = this.props
     return (
       <TabContainer>
         <Settings
-          settings={settings}
-          saveTransforms={saveTransforms} />
+          onEdit={this.handleEdit}
+          settings={settings} />
       </TabContainer>
     )
   }
@@ -73,9 +88,10 @@ class App extends Component {
   renderTransformModal() {
     return (
       <EditTransform
-        onSave={this.createTransform}
+        onSave={this.saveTransform}
+        onDelete={this.deleteTransform}
         onCancel={this.handleCloseModal}
-        transform={{}} />
+        transform={this.state.editTransform} />
     )
   }
 
@@ -90,7 +106,7 @@ class App extends Component {
 
   render() {
     const { classes } = this.props;
-    const { tab, showModal } = this.state;
+    const { tab, editTransform } = this.state;
 
     return (
       <div className={classes.root}>
@@ -102,10 +118,10 @@ class App extends Component {
             <Tab value="about" label="About" />
           </Tabs>
         </AppBar>
-        {tab === "report" && <TabContainer><Report data={this.props.data}/></TabContainer>}
+        {tab === "report" && <TabContainer><Report data={this.props.data} onEdit={this.handleEdit}/></TabContainer>}
         {tab === "settings" && this.renderSettings()}
         {tab === "about" && this.renderAbout()}
-        {showModal && this.renderTransformModal()}
+        {editTransform && this.renderTransformModal()}
         <Fab onClick={this.handleShowModal} className={classes.fab} color="primary">
           <AddIcon />
         </Fab>

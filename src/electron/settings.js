@@ -48,7 +48,7 @@ function readSettings() {
   try {
     const stats = fs.statSync(SETTINGS)
     if (stats.mtime - settings.mtime !== 0) {
-      console.log('mtime',stats.mtime, settings.mtime, typeof stats.mtime)
+      console.log('mtime',stats.mtime - settings.mtime)
       settings = JSON.parse(fs.readFileSync(SETTINGS))
       settings.mtime = stats.mtime
 
@@ -70,9 +70,8 @@ function readSettings() {
 
 function writeSettings(merge) {
   settings = {...settings, ...merge}
-
-  notifyOpenWindows()
   fs.writeFileSync(SETTINGS, JSON.stringify(settings, null, 2))
+  notifyOpenWindows()
 }
 
 ipcMain.on('add-transform', (event, transform) => {

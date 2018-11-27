@@ -14,6 +14,7 @@ module.exports = function runReplacements(record) {
 
     const matchClass = (
       transform.app == null
+        || transform.app.length === 0
         || transform.app.indexOf(record.app) >= 0
     )
     const match = record.title.match(titleRegex)
