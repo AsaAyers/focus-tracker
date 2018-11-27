@@ -38,7 +38,7 @@ class App extends Component {
   state = {
     showModal: false,
     tab: (process.env.NODE_ENV === 'development'
-      ? 'settings'
+      ? 'report'
       : 'report'
     )
   };
@@ -91,8 +91,6 @@ class App extends Component {
   render() {
     const { classes } = this.props;
     const { tab, showModal } = this.state;
-
-    console.log(process.env.NODE_ENV)
 
     return (
       <div className={classes.root}>

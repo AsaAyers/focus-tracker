@@ -1,31 +1,66 @@
 import React, { Component } from 'react';
+import { withStyles } from '@material-ui/core/styles';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Typography from '@material-ui/core/Typography';
+import Card from '@material-ui/core/Card';
+import CardHeader from '@material-ui/core/CardHeader';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
 import { toTime } from '../utils'
 
 function Time(props) {
   return toTime(props.children, props.padding === true)
 }
 
-export default class Report extends Component {
+const styles = theme => ({
+  root: {
+    width: '100%',
+  },
+  heading: {
+    fontSize: theme.typography.pxToRem(15),
+    fontWeight: theme.typography.fontWeightRegular,
+  },
+  list: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: theme.palette.background.paper,
+  },
+});
+
+class Report extends Component {
   renderRecord = (record) => {
+    const { classes } = this.props
+
     let titles = record.titles
       .filter((title) => title.total > 60)
       .map(({name, total}) => (
-        <li key={name}>
-          <Time>{total}</Time>
-          {' '}{name}
-        </li>
+        <ListItem key={name}>
+          <ListItemText primary={toTime(total) + ' ' +name} />
+        </ListItem>
       ))
 
     return (
-      <li key={record.name}>
-        <Time padding={true}>{record.total}</Time>
-        {' '}{record.name}
-        <ul>{titles}</ul>
-      </li>
+      <ExpansionPanel key={record.name}>
+        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography className={classes.heading}>
+            {toTime(record.total, true)}{' '}{record.name}
+          </Typography>
+        </ExpansionPanelSummary>
+        <ExpansionPanelDetails>
+          <List className={classes.list} dense={true}>
+            {titles}
+          </List>
+        </ExpansionPanelDetails>
+      </ExpansionPanel>
     )
   }
 
   render() {
+    const { classes } = this.props
     const data = this.props.data
       .filter(d => (
         ['MIDNIGHT', 'LOCK'].indexOf(d.name) === -1
@@ -37,12 +72,12 @@ export default class Report extends Component {
     ), 0)
 
     return (
-      <div className="report">
-        total: <Time>{total}</Time>
-        <ul>
-          {data.map(this.renderRecord)}
-        </ul>
-      </div>
+      <Card className={classes.root}>
+        <CardHeader title={ 'total: ' + toTime(total) } />
+        {data.map(this.renderRecord)}
+      </Card>
     );
   }
 }
+
+export default withStyles(styles)(Report);
