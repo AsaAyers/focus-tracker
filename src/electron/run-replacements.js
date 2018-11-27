@@ -1,21 +1,11 @@
-const fs = require('fs')
-const { TRANSFORMS } = require('../constants')
+const { readSettings } = require('./settings')
+
 
 module.exports = function runReplacements(record) {
-  let transforms = []
-  if (fs.existsSync(TRANSFORMS)) {
-    transforms = JSON.parse(fs.readFileSync(TRANSFORMS))
-  }
+  const { transforms } = readSettings()
   // eslint-disable-next-line no-shadow
   return transforms.reduce((record, transform) => {
-    if (typeof transform.title === 'string') {
-      // eslint-disable-next-line no-param-reassign
-      transform.title = new RegExp(transform.title)
-    }
-    if (typeof transform.className === 'string') {
-      // eslint-disable-next-line no-param-reassign
-      transform.className = [transform.className]
-    }
+    const titleRegex = new RegExp(transform.title)
 
     if (record.title == null) {
       // eslint-disable-next-line no-param-reassign
@@ -26,14 +16,14 @@ module.exports = function runReplacements(record) {
       transform.className == null
         || transform.className.indexOf(record.className) >= 0
     )
-    const match = record.title.match(transform.title)
+    const match = record.title.match(titleRegex)
 
     if (transform.log) {
       console.log(match, matchClass, record)
     }
 
     if (matchClass && match) {
-      const title = record.title.replace(transform.title, transform.replaceTitle)
+      const title = record.title.replace(titleRegex, transform.replaceTitle)
 
       let { className } = record
       if (transform.replaceClass) {

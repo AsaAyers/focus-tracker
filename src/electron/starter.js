@@ -7,6 +7,7 @@ const url = require('url')
 const gatherUsage = require('./gather-usage')
 const logWindows = require('./log-windows')
 const { LOGFILE } = require('../constants')
+const { readSettings, notifyOpenWindows } = require('./settings')
 
 if (process.env.ELECTRON_START_URL) {
   const chokidar = require('chokidar')
@@ -15,6 +16,8 @@ if (process.env.ELECTRON_START_URL) {
     app.exit(1)
   })
 }
+
+
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -43,12 +46,16 @@ function createWindow () {
   mainWindow.webContents.on('did-finish-load', () => {
     console.log('did-finis-hload')
     const win = mainWindow
+
+    readSettings()
+    notifyOpenWindows()
     const unsubscribe = gatherUsage(LOGFILE, (data) => {
       if (mainWindow !== win) {
         return unsubscribe()
       }
 
       mainWindow.webContents.send('update', data)
+      readSettings()
     })
   })
 

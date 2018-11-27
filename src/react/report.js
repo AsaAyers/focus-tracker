@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import { toTime } from './utils'
+import { toTime } from '../utils'
 
 function Time(props) {
   return toTime(props.children, props.padding === true)
 }
 
-class App extends Component {
+export default class Report extends Component {
   renderRecord = (record) => {
     let titles = record.titles
       .filter((title) => title.total > 60)
@@ -37,16 +37,12 @@ class App extends Component {
     ), 0)
 
     return (
-      <div className="App">
+      <div className="report">
         total: <Time>{total}</Time>
         <ul>
           {data.map(this.renderRecord)}
         </ul>
-
-        <a href="https://www.Vecteezy.com">Graphics Provided by vecteezy.com</a>
       </div>
     );
   }
 }
-
-export default App;

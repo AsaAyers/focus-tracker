@@ -132,10 +132,10 @@ module.exports = function gatherUsage(filename, callback) {
   tail.on('error', err => { throw err })
 
   tail.on('line', line => {
-    console.log(line)
     data = reducer(data, line)
   })
 
+  let sentData = {}
   function sendReport() {
     const line = JSON.stringify({
       ts: Math.round(Date.now() / 1000),
@@ -145,7 +145,9 @@ module.exports = function gatherUsage(filename, callback) {
 
     const tmp = reducer(data, line)
 
-    const sortedData = Object.values(tmp.records)
+    if (tmp.records !== sentData.records) {
+      sentData = tmp
+      const sortedData = Object.values(tmp.records)
       .sort((a, b) => b.total - a.total)
       .map(record => {
         const sortedTitles = Object.keys(record.titles)
@@ -158,18 +160,30 @@ module.exports = function gatherUsage(filename, callback) {
         }
       })
 
-    callback(sortedData)
+      callback(sortedData)
+    }
+  }
+
+  // At least report once a minute
+  const reportInterval = setInterval(sendReport, 60000)
+  let unsubscribe = function () {
+    clearInterval(reportInterval)
+    tail.stop()
   }
 
   tail.on('eof', () => {
+    const now = new Date()
+    now.setHours(0, 0, 0, 0)
+    if (now > today) {
+      unsubscribe()
+      unsubscribe = gatherUsage(filename, callback)
+      return
+    }
+
     sendReport()
   })
 
   tail.start()
-  // At least report once a minute
-  const reportInterval = setInterval(sendReport, 60000)
-  return function unsubscribe() {
-    clearInterval(reportInterval)
-    tail.stop()
-  }
+
+  return () => unsubscribe
 }
