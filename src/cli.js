@@ -17,10 +17,10 @@ if (program.tail) {
   gatherUsage(LOGFILE, (data) => {
     const report = data
       .filter(d => (
-        ['MIDNIGHT', 'LOCK'].indexOf(d.name) === -1
+        ['MIDNIGHT', 'LOCK'].indexOf(d.app) === -1
         && d.total > 60
       ))
-      .map(record => `${record.name} ${toTime(record.total)}`)
+      .map(record => `${record.app} ${toTime(record.total)}`)
     report.length = Math.min(report.length, 3)
 
     // eslint-disable-next-line no-shadow

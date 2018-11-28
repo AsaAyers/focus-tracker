@@ -13,7 +13,6 @@ function logWindow(data) {
 }
 
 module.exports = function logWindows() {
-  const isWin = process.platform === 'win32'
   let event = {}
   setInterval(() => {
     const ts = Math.floor(Date.now() / 1000)
@@ -24,26 +23,6 @@ module.exports = function logWindows() {
     } catch (e) {
       console.error(e)
       return
-    }
-
-    if (isWin) {
-      if (win.owner.name === 'LockApp.exe' || win.owner.name === "" ) {
-        if (event.app !== 'LOCK') {
-          event = {
-            ts,
-            app: "LOCK",
-            title: ""
-          }
-          logWindow(event)
-        }
-        return
-      } else if (event.app === "LOCK") {
-        logWindow({
-          ts,
-          app: "UNLOCK",
-          title: ""
-        })
-      }
     }
 
     if (event.title === win.title && event.app === win.owner.name) {

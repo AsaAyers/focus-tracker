@@ -56,26 +56,43 @@ function reducer(data, line) {
       debug('Missing app', last)
     }
 
-    let records = data.records
-    if (records[last.app] == null) {
-      records = {
-        ...records,
-        [last.app]: { name: last.app, total: 0, titles: {} }
-      }
+    // Cloning this first makes this easier, so I can just mutate the data below
+    let records = [...data.records]
+
+    let appIndex = records.findIndex(r => r.app === last.app)
+    if (appIndex === -1) {
+      records.push(
+        { app: last.app, total: 0, titles: [] }
+      )
+      console.log('records', records)
+      appIndex = records.findIndex(r => r.app === last.app)
     }
-    let titles = records[last.app].titles
-    titles = {
-      ...titles,
-      [last.title]: (titles[last.title] || 0) + time
+    const appRecord = records[appIndex]
+
+    let titles = [...appRecord.titles]
+    let titleIndex = titles.findIndex(t => t.name === last.title)
+    if (titleIndex === -1) {
+      titles.push(
+        { name: last.title, total: 0 }
+      )
+      titleIndex = titles.findIndex(t => t.name === last.title)
+    }
+    const titleRecord = titles[titleIndex]
+    if (!titleRecord) {
+      console.log(
+        last.title, titleIndex, titles
+      )
     }
 
-    records = {
-      ...records,
-      [last.app]: {
-        ...records[last.app],
-        total: records[last.app].total + time,
-        titles,
-      }
+    titles[titleIndex] = {
+      ...titleRecord,
+      total: titleRecord.total + time
+    }
+
+    records[appIndex] = {
+      ...appRecord,
+      total: appRecord.total + time,
+      titles,
     }
 
     debugTime(last.app, last.title, '+', time)
@@ -132,7 +149,7 @@ module.exports = function gatherUsage(filename, callback) {
     today,
     last,
     locked: false,
-    records: {}
+    records: []
   }
 
   tail.on('error', err => { throw err })
@@ -153,20 +170,12 @@ module.exports = function gatherUsage(filename, callback) {
 
     if (tmp.records !== sentData.records) {
       sentData = tmp
-      const sortedData = Object.values(tmp.records)
-      .sort((a, b) => b.total - a.total)
-      .map(record => {
-        const sortedTitles = Object.keys(record.titles)
-        .map(name => ({name, total: record.titles[name]}))
-        .sort((a, b) => b.total - a.total)
-
-        return {
-          ...record,
-          titles: sortedTitles
-        }
+      tmp.records.sort((a, b) => b.total - a.total)
+      tmp.records.forEach(record => {
+        record.titles.sort((a, b) => b.total - a.total)
       })
 
-      callback(sortedData)
+      callback(tmp.records)
     }
   }
 

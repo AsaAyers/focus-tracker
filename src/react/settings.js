@@ -27,8 +27,8 @@ class Settings extends React.PureComponent {
   renderApps(apps) {
     const { classes } = this.props;
 
-    return apps.map(name => (
-      <Chip key={name} label={name} className={classes.chip} />
+    return apps.map(app => (
+      <Chip key={app} label={app} className={classes.chip} />
     ))
   }
 

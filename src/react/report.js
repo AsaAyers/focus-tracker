@@ -37,36 +37,37 @@ class Report extends Component {
     const { classes } = this.props
 
     let titles = record.titles
-      .filter((title) => title.total > 60)
-      .map(({name, total}) => (
-        <ListItem key={name} button={true} onClick={this.handleEdit([record.name], name)}>
-          <ListItemText primary={toTime(total) + ' ' +name} />
+      .filter((title) => title.total > 60 && title.name.length > 0)
+      .map((title) => (
+        <ListItem key={title.name} button={true} onClick={this.handleEdit([record.app], title.name)}>
+          <ListItemText primary={toTime(title.total) + ' ' +title.name} />
         </ListItem>
       ))
 
     return (
-      <ExpansionPanel key={record.name}>
+      <ExpansionPanel key={record.app}>
         <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
           <Typography className={classes.heading}>
-            {toTime(record.total, true)}{' '}{record.name}
+            {toTime(record.total, true)}{' '}{record.app}
           </Typography>
         </ExpansionPanelSummary>
+        {titles.length > 0 &&
         <ExpansionPanelDetails>
           <List className={classes.list} dense={true}>
             {titles}
           </List>
         </ExpansionPanelDetails>
+        }
       </ExpansionPanel>
     )
   }
 
   render() {
     const { classes } = this.props
-    const data = this.props.data
-      .filter(d => (
-        ['MIDNIGHT', 'LOCK'].indexOf(d.name) === -1
-        && d.total > 60
-      ))
+    const data = this.props.data.filter(d => (
+      ['MIDNIGHT', 'LOCK'].indexOf(d.app) === -1
+      && d.total > 60
+    ))
 
     const total = data.reduce((total, record) => (
       total + record.total

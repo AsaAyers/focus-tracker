@@ -104,6 +104,15 @@ class App extends Component {
     )
   }
 
+  renderReport() {
+    let { data } = this.props
+    return (
+      <TabContainer>
+        <Report data={data} onEdit={this.handleEdit}/>
+      </TabContainer>
+    )
+  }
+
   render() {
     const { classes } = this.props;
     const { tab, editTransform } = this.state;
@@ -118,7 +127,7 @@ class App extends Component {
             <Tab value="about" label="About" />
           </Tabs>
         </AppBar>
-        {tab === "report" && <TabContainer><Report data={this.props.data} onEdit={this.handleEdit}/></TabContainer>}
+        {tab === "report" && this.renderReport()}
         {tab === "settings" && this.renderSettings()}
         {tab === "about" && this.renderAbout()}
         {editTransform && this.renderTransformModal()}
