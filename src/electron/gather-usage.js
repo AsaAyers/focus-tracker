@@ -32,22 +32,18 @@ function reducer(data, parsedLine) {
       return data
     }
 
-    if (!record.app) {
-      console.error(parsedLine)
-      debug('missing app')
-    }
-
-    if (record.app === 'UNLOCK') {
-      if (!locked) {
+    // On Linux `active-win` doesn't detect when the system is locked, so I have
+    // to use an external script to record my LOCK and UNLOCK times and ignore
+    // any records in between
+    if (process.platform === 'linux') {
+      if (locked && record.app !== 'UNLOCK') {
+        return data
+      }
+      if (!locked && record.app === 'UNLOCK') {
         return {
           ...data,
           last: record
         }
-      }
-    }
-    if (locked) {
-      if (record.app !== 'UNLOCK') {
-        return data
       }
     }
 
@@ -124,6 +120,7 @@ function reducer(data, parsedLine) {
     return {
       ...data,
       records,
+      locked: false,
       last : record
     }
   }
