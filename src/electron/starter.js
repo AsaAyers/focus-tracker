@@ -1,12 +1,10 @@
 // https://medium.freecodecamp.org/building-an-electron-application-with-create-react-app-97945861647c
 
-// Modules to control application life and create native browser window
-const {ipcMain, app, Menu, Tray, BrowserWindow} = require('electron')
+const {app, Menu, Tray, BrowserWindow} = require('electron')
 const path = require('path')
 const url = require('url')
 const gatherUsage = require('./gather-usage')
 const logWindows = require('./log-windows')
-const { LOGFILE } = require('../constants')
 const { readSettings, notifyOpenWindows } = require('./settings')
 
 if (process.env.ELECTRON_START_URL) {
@@ -17,7 +15,7 @@ if (process.env.ELECTRON_START_URL) {
   })
 }
 
-
+global.gatherUsage = gatherUsage
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -45,34 +43,8 @@ function createWindow () {
 
   mainWindow.webContents.on('did-finish-load', () => {
     console.log('did-finis-hload')
-    const win = mainWindow
-
     readSettings()
     notifyOpenWindows()
-    // I'm definitely missing an easier way to do this
-    function setupUsageSubscription() {
-      let unsubscribe
-      function reset() {
-        console.log('reset')
-        unsubscribe()
-        ipcMain.removeListener('reset', reset)
-        if (mainWindow === win) {
-          setupUsageSubscription()
-        }
-      }
-
-      console.log('subscribe to usage')
-      unsubscribe = gatherUsage(LOGFILE, (data) => {
-        if (mainWindow !== win) {
-          return reset()
-        }
-
-        mainWindow.webContents.send('update', data)
-        readSettings()
-      })
-      ipcMain.on('reset', reset)
-    }
-    setupUsageSubscription()
   })
 
   mainWindow.on('closed', function () {

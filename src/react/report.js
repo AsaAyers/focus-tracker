@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import moment from 'moment'
 import { withStyles } from '@material-ui/core/styles';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
@@ -29,8 +30,34 @@ const styles = theme => ({
 
 class Report extends Component {
 
+  state = {
+    date: new Date(),
+    data: []
+  }
+
   handleEdit = (app, title) => () => {
     this.props.onEdit({ app, title })
+  }
+
+  setDate = (data) => this.setState({ data })
+
+  subscribeToDate() {
+    this.unsubscribe = this.props.gatherUsage(this.state.date, this.setDate)
+  }
+
+  componentDidMount() {
+    this.subscribeToDate()
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.date !== this.state.date) {
+      this.unsubscribe()
+      this.subscribeToDate()
+    }
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe()
   }
 
   renderRecord = (record) => {
@@ -62,20 +89,55 @@ class Report extends Component {
     )
   }
 
-  render() {
-    const { classes } = this.props
-    const data = this.props.data.filter(d => (
-      ['MIDNIGHT', 'LOCK'].indexOf(d.app) === -1
-      && d.total > 60
-    ))
+  handleNext = () => {
+    const tmp = moment(this.state.date).add(1, 'day')
 
+    this.setState({
+      data: [],
+      date: tmp.toDate()
+    })
+  }
+
+  handlePrevious = () => {
+    const tmp = moment(this.state.date).subtract(1, 'day')
+
+    this.setState({
+      data: [],
+      date: tmp.toDate()
+    })
+  }
+
+  renderTitle(data) {
+    const date = moment(this.state.date).format('YYYY-MM-DD')
     const total = data.reduce((total, record) => (
       total + record.total
     ), 0)
 
+    console.log('wat?')
+
+    return (
+      <div>
+        <button onClick={this.handlePrevious}>&lt;</button>
+        &nbsp;{date} total: {toTime(total, true)}&nbsp;
+        <button onClick={this.handleNext}>&gt;</button>
+      </div>
+    )
+  }
+
+  render() {
+    const { classes } = this.props
+    const data = this.state.data.filter(d => (
+      ['MIDNIGHT', 'LOCK'].indexOf(d.app) === -1
+      && d.total > 60
+    ))
+
+
+
     return (
       <Card className={classes.root}>
-        <CardHeader title={ 'total: ' + toTime(total) } />
+        <CardHeader title={
+            this.renderTitle(data)
+        } />
         {data.map(this.renderRecord)}
       </Card>
     );

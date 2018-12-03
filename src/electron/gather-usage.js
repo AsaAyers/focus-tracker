@@ -1,6 +1,9 @@
 const Tail = require('tail-file')
 const createDebug = require('debug')
+const moment = require('moment')
+const uuid = require('uuid/v4')
 const runReplacements = require('./run-replacements')
+const { LOGFILE } = require('../constants')
 
 const debug = createDebug('focus-tracker')
 const debugLine = debug.extend('line')
@@ -20,17 +23,16 @@ function parseLine(line) {
   }
 }
 
-function reducer(data, line) {
+function reducer(data, parsedLine) {
   const { last, locked } = data
-  const tmp = parseLine(line)
 
-  if (tmp.ts > 0 && tmp.ts >= last.ts) {
-    const record = runReplacements(tmp)
+  if (parsedLine.ts > 0 && parsedLine.ts >= last.ts && parsedLine.ts <= data.endOfDay) {
+    const record = runReplacements(parsedLine)
     // const { ts, title, app } = runReplacements(tmp);
     const time = record.ts - last.ts
 
     if (!record.app) {
-      console.error(line)
+      console.error(parsedLine)
       debug('missing app')
     }
 
@@ -51,7 +53,7 @@ function reducer(data, line) {
       return data
     }
 
-    debugLine(time, line)
+    debugLine(time, parsedLine)
     if (!last.app) {
       debug('Missing app', last)
     }
@@ -64,7 +66,7 @@ function reducer(data, line) {
       records.push(
         { app: last.app, total: 0, titles: [] }
       )
-      console.log('records', records)
+      // console.log('records', records)
       appIndex = records.findIndex(r => r.app === last.app)
     }
     const appRecord = records[appIndex]
@@ -78,11 +80,6 @@ function reducer(data, line) {
       titleIndex = titles.findIndex(t => t.name === last.title)
     }
     const titleRecord = titles[titleIndex]
-    if (!titleRecord) {
-      console.log(
-        last.title, titleIndex, titles
-      )
-    }
 
     titles[titleIndex] = {
       ...titleRecord,
@@ -131,40 +128,37 @@ function reducer(data, line) {
   return data
 }
 
-module.exports = function gatherUsage(filename, callback) {
-  console.log('tail', filename)
-  const tail = new Tail(filename, {
+module.exports = function gatherUsage(date, callback) {
+  const id = uuid()
+  console.log('tail', LOGFILE, id)
+  const tail = new Tail(LOGFILE, {
     startPos: 0
   })
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  date.setHours(0, 0, 0, 0)
 
   let last = {
-    ts: Math.round(today.getTime() / 1000),
+    ts: Math.round(date.getTime() / 1000),
     app: 'MIDNIGHT',
     title: 'none',
   }
+  date.setHours(24, 0, 0, 0)
+
+
   let data = {
     MIN_TIME: 10,
-    today,
+    endOfDay: Math.round(date.getTime() / 1000),
     last,
     locked: false,
     records: []
   }
 
-  tail.on('error', err => { throw err })
-
-  tail.on('line', line => {
-    data = reducer(data, line)
-  })
-
   let sentData = {}
   function sendReport() {
-    const line = JSON.stringify({
+    const line = {
       ts: Math.round(Date.now() / 1000),
       app: 'END',
       title: ""
-    })
+    }
 
     const tmp = reducer(data, line)
 
@@ -175,26 +169,35 @@ module.exports = function gatherUsage(filename, callback) {
         record.titles.sort((a, b) => b.total - a.total)
       })
 
+      console.log('send', moment(date).format('YYYY-MM-DD'), id)
+
       callback(tmp.records)
     }
   }
 
   // At least report once a minute
-  const reportInterval = setInterval(sendReport, 60000)
+  let reportInterval = setInterval(sendReport, 60000)
+  let done = false
   let unsubscribe = function () {
-    clearInterval(reportInterval)
+    if (done) return
+    done = true
     tail.stop()
+    clearInterval(reportInterval)
   }
 
-  tail.on('eof', () => {
-    const now = new Date()
-    now.setHours(0, 0, 0, 0)
-    if (now > today) {
-      unsubscribe()
-      unsubscribe = gatherUsage(filename, callback)
-      return
-    }
+  tail.on('error', err => { throw err })
 
+  tail.on('line', line => {
+    const parsedLine = parseLine(line)
+    if (parsedLine.ts > data.endOfDay && !done) {
+      console.log('end of day unsubscribe')
+      sendReport()
+      unsubscribe()
+    }
+    data = reducer(data, parsedLine)
+  })
+
+  tail.on('eof', () => {
     sendReport()
   })
 

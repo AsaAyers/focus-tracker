@@ -105,10 +105,10 @@ class App extends Component {
   }
 
   renderReport() {
-    let { data } = this.props
+    let { gatherUsage } = this.props
     return (
       <TabContainer>
-        <Report data={data} onEdit={this.handleEdit}/>
+        <Report gatherUsage={gatherUsage} onEdit={this.handleEdit}/>
       </TabContainer>
     )
   }
