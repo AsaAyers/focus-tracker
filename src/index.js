@@ -28,6 +28,7 @@ function gatherUsage(date, callback) {
 
   let done = false
   function unsubscribe() {
+    console.log('unsubscribe', done)
     if (done) return
     done = true
     window.removeEventListener('beforeunload', unsubscribe)

@@ -28,8 +28,9 @@ function reducer(data, parsedLine) {
 
   if (parsedLine.ts > 0 && parsedLine.ts >= last.ts && parsedLine.ts <= data.endOfDay) {
     const record = runReplacements(parsedLine)
-    // const { ts, title, app } = runReplacements(tmp);
-    const time = record.ts - last.ts
+    if (last.app === record.app && last.title === record.title) {
+      return data
+    }
 
     if (!record.app) {
       console.error(parsedLine)
@@ -49,6 +50,8 @@ function reducer(data, parsedLine) {
         return data
       }
     }
+
+    const time = record.ts - last.ts
     if (time < data.MIN_TIME) {
       return data
     }

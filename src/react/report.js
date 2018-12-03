@@ -30,30 +30,57 @@ const styles = theme => ({
 
 class Report extends Component {
 
-  state = {
-    date: new Date(),
-    data: []
+  constructor(props) {
+    super(props)
+    const date= new Date()
+    date.setHours(0, 0, 0, 0)
+
+    this.state = {
+      today: date,
+      date,
+      data: []
+    }
   }
 
   handleEdit = (app, title) => () => {
     this.props.onEdit({ app, title })
   }
 
-  setDate = (data) => this.setState({ data })
+  setData = (data) => {
+    this.setState({ data })
+  }
 
-  subscribeToDate() {
-    this.unsubscribe = this.props.gatherUsage(this.state.date, this.setDate)
+  subscribeToDate(date = new Date()) {
+    date.setHours(0, 0, 0, 0)
+
+    if (typeof this.unsubscribe === 'function') {
+      console.log('unsub', this.unsubscribe.id)
+      this.unsubscribe()
+    }
+
+    this.unsubscribe = this.props.gatherUsage(date, this.setData)
+    this.unsubscribe.id = Math.random()
+    this.setState({
+      data: [],
+      date
+    })
+  }
+
+  handleNext = () => {
+    const tmp = moment(this.state.date).add(1, 'day')
+
+    if (tmp < new Date()) {
+      this.subscribeToDate(tmp.toDate())
+    }
+  }
+
+  handlePrevious = () => {
+    const tmp = moment(this.state.date).subtract(1, 'day')
+    this.subscribeToDate(tmp.toDate())
   }
 
   componentDidMount() {
     this.subscribeToDate()
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.date !== this.state.date) {
-      this.unsubscribe()
-      this.subscribeToDate()
-    }
   }
 
   componentWillUnmount() {
@@ -89,23 +116,6 @@ class Report extends Component {
     )
   }
 
-  handleNext = () => {
-    const tmp = moment(this.state.date).add(1, 'day')
-
-    this.setState({
-      data: [],
-      date: tmp.toDate()
-    })
-  }
-
-  handlePrevious = () => {
-    const tmp = moment(this.state.date).subtract(1, 'day')
-
-    this.setState({
-      data: [],
-      date: tmp.toDate()
-    })
-  }
 
   renderTitle(data) {
     const date = moment(this.state.date).format('YYYY-MM-DD')
@@ -113,13 +123,13 @@ class Report extends Component {
       total + record.total
     ), 0)
 
-    console.log('wat?')
-
     return (
       <div>
         <button onClick={this.handlePrevious}>&lt;</button>
         &nbsp;{date} total: {toTime(total, true)}&nbsp;
-        <button onClick={this.handleNext}>&gt;</button>
+        {this.state.date < this.state.today &&
+          <button onClick={this.handleNext}>&gt;</button>
+        }
       </div>
     )
   }
@@ -130,8 +140,6 @@ class Report extends Component {
       ['MIDNIGHT', 'LOCK'].indexOf(d.app) === -1
       && d.total > 60
     ))
-
-
 
     return (
       <Card className={classes.root}>

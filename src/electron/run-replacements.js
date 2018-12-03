@@ -7,6 +7,11 @@ module.exports = function runReplacements(record) {
   return transforms.reduce((record, transform) => {
     const titleRegex = new RegExp(transform.title)
 
+    // On Windows if the screen is locked the app is an empty string.
+    if (record.app === "") {
+      // eslint-disable-next-line no-param-reassign
+      record.app = "LOCK"
+    }
     if (record.title == null) {
       // eslint-disable-next-line no-param-reassign
       record.title = ''
