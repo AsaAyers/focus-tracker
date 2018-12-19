@@ -24,27 +24,12 @@ function parseLine(line) {
 }
 
 function reducer(data, parsedLine) {
-  const { last, locked } = data
+  const { last } = data
 
   if (parsedLine.ts > 0 && parsedLine.ts >= last.ts && parsedLine.ts <= data.endOfDay) {
     const record = runReplacements(parsedLine)
     if (last.app === record.app && last.title === record.title) {
       return data
-    }
-
-    // On Linux `active-win` doesn't detect when the system is locked, so I have
-    // to use an external script to record my LOCK and UNLOCK times and ignore
-    // any records in between
-    if (process.platform === 'linux') {
-      if (locked && record.app !== 'UNLOCK') {
-        return data
-      }
-      if (!locked && record.app === 'UNLOCK') {
-        return {
-          ...data,
-          last: record
-        }
-      }
     }
 
     const time = record.ts - last.ts
@@ -93,34 +78,9 @@ function reducer(data, parsedLine) {
 
     debugTime(last.app, last.title, '+', time)
 
-    if (record.app === 'LOCK') {
-      return {
-        ...data,
-        records,
-        locked: true,
-        last : {
-          ...record,
-          beforeLock: last.app,
-        }
-      }
-
-    } else if (record.app === 'UNLOCK') {
-      return {
-        ...data,
-        records,
-        locked: false,
-        last: {
-          ...record,
-          // When I unlock my computer in the morning, there isn't a matching
-          // LOCK record, so beforeUnlock is undefined.
-          app: last.beforeLock || last.app,
-        }
-      }
-    }
     return {
       ...data,
       records,
-      locked: false,
       last : record
     }
   }
@@ -148,7 +108,6 @@ module.exports = function gatherUsage(date, callback) {
     MIN_TIME: 10,
     endOfDay: Math.round(date.getTime() / 1000),
     last,
-    locked: false,
     records: []
   }
 

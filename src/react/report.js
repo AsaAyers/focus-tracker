@@ -83,6 +83,23 @@ class Report extends Component {
     this.subscribeToDate()
   }
 
+  componentDidUpdate(pervProps, prevState) {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    // If the date changed...
+    if (today > this.state.today) {
+      this.setState({
+        // correct today
+        today,
+        // If we were watching yesterday, move it forward automatically.
+        date: (this.state.date.getTime() === this.state.today.getTime())
+          ? today
+          : this.state.date
+      })
+    }
+  }
+
   componentWillUnmount() {
     this.unsubscribe()
   }
