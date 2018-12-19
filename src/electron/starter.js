@@ -57,6 +57,7 @@ function showWindow() {
   if (mainWindow == null) {
     createWindow()
   } else {
+    if (mainWindow.isMinimized()) mainWindow.restore()
     mainWindow.focus()
   }
 }
@@ -73,40 +74,35 @@ function onReady() {
   appIcon.setToolTip('Focus Tracker')
   appIcon.setContextMenu(contextMenu)
 
+  if (!app.requestSingleInstanceLock()) {
+    showWindow()
+  }
 
   if (process.env.ELECTRON_START_URL) {
     showWindow()
   }
 }
 
-
-if (!app.requestSingleInstanceLock()) {
+// Instead of exiting the new instance of the app, I'm having the old one shut
+// down. This makes development easier as I can just `npm start` and it will run
+// the new code.
+app.on('second-instance', (event, commandLine, workingDirectory) => {
   app.quit()
-} else {
-  // This method will be called when Electron has finished
-  // initialization and is ready to create browser windows.
-  // Some APIs can only be used after this event occurs.
-  app.on('ready', onReady)
+})
 
-  app.on('second-instance', (event, commandLine, workingDirectory) => {
-    // Someone tried to run a second instance, we should focus our window.
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) mainWindow.restore()
-      mainWindow.focus()
-    } else {
-      createWindow()
-    }
-  })
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+// Some APIs can only be used after this event occurs.
+app.on('ready', onReady)
 
-  app.on('window-all-closed', function () {
-    // This app doesn't exit when the window closes.
-  });
+app.on('window-all-closed', function () {
+  // This app doesn't exit when the window closes.
+});
 
-  app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (mainWindow === null) {
-      createWindow()
-    }
-  })
-}
+app.on('activate', function () {
+  // On macOS it's common to re-create a window in the app when the
+  // dock icon is clicked and there are no other windows open.
+  if (mainWindow === null) {
+    createWindow()
+  }
+})
