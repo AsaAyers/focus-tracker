@@ -39,6 +39,7 @@
   ],
   "devDependencies": {
     "cross-env": "^5.2.0",
-    "foreman": "^3.0.1"
+    "foreman": "^3.0.1",
+    "nodemon": "^1.18.9"
   }
 }

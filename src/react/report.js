@@ -11,7 +11,10 @@ import CardHeader from '@material-ui/core/CardHeader';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import createDebug from 'debug'
 import { toTime } from '../utils'
+
+const debug = createDebug('focus-tracker:report')
 
 const styles = theme => ({
   root: {
@@ -47,6 +50,7 @@ class Report extends Component {
   }
 
   setData = (data) => {
+    debug(data)
     this.setState({ data })
   }
 

@@ -12,11 +12,7 @@ const debugTime = debug.extend('time')
 function parseLine(line) {
   try {
     const record = JSON.parse(line)
-
-    // Temporary backward compatibility
-    if (!record.app && record.className) {
-      record.app = record.className
-    }
+    record.title = record.title || ""
     return record
   } catch (e) {
     return { ts: 0 }
