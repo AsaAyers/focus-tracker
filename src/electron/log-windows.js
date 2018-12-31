@@ -57,10 +57,12 @@ module.exports = function logWindows() {
 
     if (locked !== isLocked(win)) {
       locked = !locked
-      logWindow({
+      event = {
         ts,
-        app: locked ? 'LOCK' : 'UNLOCK'
-      })
+        app: locked ? 'LOCK' : 'UNLOCK',
+        title: '',
+      }
+      logWindow(event)
     }
     if (locked) {
       return
