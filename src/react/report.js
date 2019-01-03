@@ -55,6 +55,8 @@ class Report extends Component {
   }
 
   subscribeToDate(date = new Date()) {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
     date.setHours(0, 0, 0, 0)
 
     if (typeof this.unsubscribe === 'function') {
@@ -66,7 +68,8 @@ class Report extends Component {
     this.unsubscribe.id = Math.random()
     this.setState({
       data: [],
-      date
+      date,
+      today,
     })
   }
 
@@ -93,14 +96,13 @@ class Report extends Component {
 
     // If the date changed...
     if (today > this.state.today) {
-      this.setState({
-        // correct today
-        today,
-        // If we were watching yesterday, move it forward automatically.
-        date: (this.state.date.getTime() === this.state.today.getTime())
-          ? today
-          : this.state.date
-      })
+      // If we were watching yesterday, move it forward automatically.
+      if (this.state.date.getTime() === this.state.today.getTime()) {
+        this.subscribeToDate(today)
+      } else {
+        this.setState({ today })
+      }
+
     }
   }
 
