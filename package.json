@@ -12,17 +12,26 @@
   "build": {
     "appId": "com.asaayers.focus-tracker"
   },
+  "electronWebpack": {
+    "title": "Focus Tracker"
+  },
   "dependencies": {
     "@types/active-win": "^4.0.0",
+    "@types/react": "^16.8.4",
+    "@types/react-dom": "^16.8.2",
     "@types/uuid": "^3.4.4",
     "active-win": "^4.1.0",
     "commander": "^2.19.0",
     "debug": "^4.1.1",
+    "electron-is-dev": "^1.0.1",
     "moment": "^2.24.0",
+    "react": "^16.8.3",
+    "react-dom": "^16.8.3",
     "source-map-support": "^0.5.10"
   },
   "devDependencies": {
     "@babel/preset-react": "^7.0.0",
+    "@types/electron-is-dev": "^0.3.0",
     "electron": "4.0.1",
     "electron-builder": "20.38.4",
     "electron-webpack": "^2.6.2",

@@ -1,12 +1,7 @@
 import { app, ipcMain } from 'electron'
 import fs from 'fs'
-import { LOGFILE, SETTINGS, Transform } from '../constants'
+import { LOGFILE, Settings, SETTINGS, Transform } from '../constants'
 
-type Settings = {
-  logfile: string,
-  transforms: Array<Transform>,
-  mtime: number,
-}
 
 let settings: Settings = {
   logfile: LOGFILE,

@@ -4,6 +4,7 @@ import { app, BrowserWindow, Tray, Menu } from 'electron'
 import * as path from 'path'
 import { format as formatUrl } from 'url'
 import logWindows from './log-windows'
+import isDev from 'electron-is-dev'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -62,7 +63,8 @@ function onReady() {
     createMainWindow()
   }
 
-  if (process.env.ELECTRON_START_URL) {
+  if (isDev) {
+    // adsf
     createMainWindow()
   }
 }

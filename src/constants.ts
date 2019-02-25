@@ -23,3 +23,10 @@ export type NewTransform = {
 export type Transform = NewTransform & {
   id: string,
 }
+
+
+export type Settings = {
+  logfile: string,
+  transforms: Array<Transform>,
+  mtime: number,
+}
