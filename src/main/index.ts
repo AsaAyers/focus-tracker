@@ -1,13 +1,13 @@
 'use strict'
 
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, Tray, Menu } from 'electron'
 import * as path from 'path'
 import { format as formatUrl } from 'url'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // global reference to mainWindow (necessary to prevent window from being garbage collected)
-let mainWindow
+let mainWindow: BrowserWindow | null
 
 function createMainWindow() {
   const window = new BrowserWindow()
@@ -41,12 +41,40 @@ function createMainWindow() {
   return window
 }
 
-// quit application when all windows are closed
-app.on('window-all-closed', () => {
-  // on macOS it is common for applications to stay open until the user explicitly quits
-  if (process.platform !== 'darwin') {
-    app.quit()
+let appIcon
+function onReady() {
+  // logWindows()
+  const icon = path.join(__dirname, '../../Free_Egg_Timer_Vector_01/clock.png')
+
+  appIcon = new Tray(icon)
+  function onClick() {
+    console.log('click')
+    createMainWindow()
   }
+  const contextMenu = Menu.buildFromTemplate([
+    { label: 'Open', type: 'normal', click: onClick },
+  ])
+  appIcon.setToolTip('Focus Tracker')
+  appIcon.setContextMenu(contextMenu)
+
+  if (!app.requestSingleInstanceLock()) {
+    createMainWindow()
+  }
+
+  if (process.env.ELECTRON_START_URL) {
+    createMainWindow()
+  }
+}
+
+// Instead of exiting the new instance of the app, I'm having the old one shut
+// down. This makes development easier as I can just `npm start` and it will run
+// the new code.
+app.on('second-instance', (event, commandLine, workingDirectory) => {
+  app.quit()
+})
+
+app.on('window-all-closed', () => {
+  // This app doesn't exit when the window closes.
 })
 
 app.on('activate', () => {
@@ -58,5 +86,6 @@ app.on('activate', () => {
 
 // create main BrowserWindow when electron is ready
 app.on('ready', () => {
-  mainWindow = createMainWindow()
+  // mainWindow = createMainWindow()
+  onReady()
 })

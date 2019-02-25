@@ -1,20 +1,31 @@
 {
-  "name": "electron-webpack-quick-start",
+  "name": "focus-tracker",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
+    "postinstall": "electron-builder install-app-deps",
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
     "dist": "yarn compile && electron-builder",
     "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
   },
+  "build": {
+    "appId": "com.asaayers.focus-tracker"
+  },
   "dependencies": {
+    "active-win": "^4.1.0",
+    "commander": "^2.19.0",
+    "debug": "^4.1.1",
+    "moment": "^2.24.0",
     "source-map-support": "^0.5.10"
   },
   "devDependencies": {
+    "@babel/preset-react": "^7.0.0",
     "electron": "4.0.1",
     "electron-builder": "20.38.4",
     "electron-webpack": "^2.6.2",
+    "electron-webpack-ts": "^3.1.1",
+    "typescript": "^3.3.3333",
     "webpack": "4.28.4"
   }
 }
