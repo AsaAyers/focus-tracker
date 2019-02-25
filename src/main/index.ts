@@ -3,6 +3,7 @@
 import { app, BrowserWindow, Tray, Menu } from 'electron'
 import * as path from 'path'
 import { format as formatUrl } from 'url'
+import logWindows from './log-windows'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -43,7 +44,7 @@ function createMainWindow() {
 
 let appIcon
 function onReady() {
-  // logWindows()
+  logWindows()
   const icon = path.join(__dirname, '../../Free_Egg_Timer_Vector_01/clock.png')
 
   appIcon = new Tray(icon)
@@ -69,7 +70,7 @@ function onReady() {
 // Instead of exiting the new instance of the app, I'm having the old one shut
 // down. This makes development easier as I can just `npm start` and it will run
 // the new code.
-app.on('second-instance', (event, commandLine, workingDirectory) => {
+app.on('second-instance', () => {
   app.quit()
 })
 

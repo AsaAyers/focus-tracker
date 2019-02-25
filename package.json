@@ -13,6 +13,8 @@
     "appId": "com.asaayers.focus-tracker"
   },
   "dependencies": {
+    "@types/active-win": "^4.0.0",
+    "@types/uuid": "^3.4.4",
     "active-win": "^4.1.0",
     "commander": "^2.19.0",
     "debug": "^4.1.1",
