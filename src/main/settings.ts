@@ -1,5 +1,5 @@
 import { app, ipcMain } from 'electron'
-import fs from 'fs'
+import * as fs from 'fs'
 import { LOGFILE, Settings, SETTINGS, Transform } from '../constants'
 
 

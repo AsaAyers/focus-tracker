@@ -1,0 +1,1 @@
+delcare module "tail-file";

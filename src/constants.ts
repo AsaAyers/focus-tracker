@@ -1,15 +1,14 @@
-import os from 'os'
-import path from 'path'
+import * as os from 'os'
+import * as path from 'path'
 
-export const SETTINGS = path.join(os.homedir(), '.focus-tracker.json')
-export const LOGFILE = path.join(os.homedir(), 'focus-tracker.log')
+export const SETTINGS = path.join(os.homedir(), '.focus-tracker-ts.json')
+export const LOGFILE = path.join(os.homedir(), 'focus-tracker-ts.log')
 export const TRANSFORMS = path.join(os.homedir(), '.i3-monitor.json')
 
 export type FocussedWindow = {
   ts: number,
   app: string,
   title: string,
-
 }
 
 export type NewTransform = {
@@ -30,3 +29,13 @@ export type Settings = {
   transforms: Array<Transform>,
   mtime: number,
 }
+export interface Record {
+  app: FocussedWindow["app"],
+  total: number,
+  titles: Array<{
+    name: string,
+    total: number
+  }>
+}
+
+export type UsageCallback = (records: Array<Record>) => void

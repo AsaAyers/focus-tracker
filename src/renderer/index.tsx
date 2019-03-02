@@ -1,6 +1,6 @@
 import * as React from 'react';
-import ReactDOM from 'react-dom';
-import { Settings } from '../constants'
+import * as ReactDOM from 'react-dom';
+import { Settings, Transform, UsageCallback } from '../constants'
 import App from './app';
 
 declare global {
@@ -16,7 +16,7 @@ const { ipcRenderer, remote } = electron
 //   global.ipcRenderer = ipcRenderer
 // }
 
-function saveTransforms(transforms) {
+function saveTransforms(transforms: Array<Transform>) {
   ipcRenderer.send('save-transforms', transforms)
 }
 
@@ -30,31 +30,14 @@ function watchDate(date: Date) {
   ipcRenderer.send('reset', reportDate)
 }
 
-function gatherUsage(date, callback) {
-  const remoteUnsubscribe = remote.getGlobal('gatherUsage')(date, callback)
-
-  let done = false
-  function unsubscribe() {
-    console.log('unsubscribe', done)
-    if (done) return
-    done = true
-    window.removeEventListener('beforeunload', unsubscribe)
-    remoteUnsubscribe()
-  }
-
-  window.addEventListener('beforeunload', unsubscribe)
-
-  return unsubscribe
-}
 
 function render() {
 
   ReactDOM.render((
     <App
-      gatherUsage={gatherUsage}
-      watchDate={watchDate}
-      saveTransforms={saveTransforms}
-      settings={settings} />
+      watchDate={ watchDate }
+      saveTransforms={ saveTransforms }
+      settings={ settings } />
   ), document.getElementById('app'));
 }
 
